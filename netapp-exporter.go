@@ -177,6 +177,7 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 		vp, err := client.GetVolumePerf()
 		if err != nil {
 			log.Error(err.Error())
+			return
 		}
 		for _, v := range vp {
 			aggr := volMap[v.ObjectName]
@@ -278,7 +279,7 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 	// Aggregate
 	go func() {
 		defer wg.Done()
-		//defer timeTrack(time.Now(), "Aggregates")
+
 		client := ontap.NewClient(e.url, e.user, e.password, e.useSSL)
 		client.Debug = e.debug
 
