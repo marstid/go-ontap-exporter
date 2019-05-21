@@ -1,0 +1,12 @@
+version: "3.3"
+services:
+  go-ontap-exporter:
+    image: go-netapp:latest
+    restart: always
+    environment:
+      HOST: "filer.host.name"
+      USERID: "ontap-username"
+      PASSWORD: "ontap-password"
+      DEBUG: "false"
+    ports:
+      - "9099:9099"
