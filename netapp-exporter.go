@@ -53,7 +53,10 @@ func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
 }
 
 func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
-	defer timeTrack(time.Now(), "Total Time")
+
+	if e.debug {
+		defer timeTrack(time.Now(), "Total Time")
+	}
 
 	client := ontap.NewClient(e.url, e.user, e.password, e.useSSL)
 	client.Debug = e.debug
@@ -167,10 +170,13 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 
 		// Volume Performance
 		volMap, _ := client.GetVolumeToAggrMap()
+		if err != nil {
+			log.Error(err.Error())
+		}
 
 		vp, err := client.GetVolumePerf()
 		if err != nil {
-			log.Info(err.Error())
+			log.Error(err.Error())
 		}
 		for _, v := range vp {
 			aggr := volMap[v.ObjectName]
