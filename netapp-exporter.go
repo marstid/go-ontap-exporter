@@ -303,6 +303,53 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 			)
 		}
 
+		ai, err := client.GetAggrInfo(100)
+		if err != nil {
+			log.Error(err.Error())
+			return
+		}
+
+		for _, v := range ai {
+
+			val, err := strconv.ParseFloat(v.SizeUsed, 64)
+			if err != nil {
+				val = 0
+			}
+
+			ch <- prometheus.MustNewConstMetric(
+				prometheus.NewDesc(namespace+"aggr_size_used", "Aggregate Size Used", []string{}, prometheus.Labels{"aggr": v.Name, "cluster": clusterName}),
+				prometheus.GaugeValue,
+				float64(val),
+			)
+
+			val, err = strconv.ParseFloat(v.SizeTotal, 64)
+			if err != nil {
+				val = 0
+			}
+
+			ch <- prometheus.MustNewConstMetric(
+				prometheus.NewDesc(namespace+"aggr_size_total", "Aggregate Size Total", []string{}, prometheus.Labels{"aggr": v.Name, "cluster": clusterName}),
+				prometheus.GaugeValue,
+				float64(val),
+			)
+
+			if v.State == "Online" {
+
+				ch <- prometheus.MustNewConstMetric(
+					prometheus.NewDesc(namespace+"aggr_state", "Aggregate State. 1 == Online", []string{}, prometheus.Labels{"aggr": v.Name, "cluster": clusterName}),
+					prometheus.GaugeValue,
+					float64(1),
+				)
+			} else {
+				ch <- prometheus.MustNewConstMetric(
+					prometheus.NewDesc(namespace+"aggr_state", "Aggregate State. 1 == Online", []string{}, prometheus.Labels{"aggr": v.Name, "cluster": clusterName}),
+					prometheus.GaugeValue,
+					float64(0),
+				)
+			}
+
+		}
+
 	}()
 
 	wg.Wait()
