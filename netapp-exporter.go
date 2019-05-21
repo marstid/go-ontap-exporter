@@ -104,7 +104,6 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 			}
 		}
 
-
 		// Disk Info
 		di, err := client.GetDiskInfo()
 		if err != nil {
@@ -182,7 +181,7 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 
 			ch <- prometheus.MustNewConstMetric(
 				prometheus.NewDesc(namespace+"volume_"+v.Counter, "Volume Performance counter", []string{}, prometheus.Labels{"volume": v.ObjectName, "aggr": aggr, "cluster": clusterName}),
-				prometheus.GaugeValue,
+				prometheus.CounterValue,
 				val,
 			)
 		}
@@ -292,7 +291,7 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 
 			ch <- prometheus.MustNewConstMetric(
 				prometheus.NewDesc(namespace+"aggr_"+v.Counter, "Aggregate Performance counter "+v.Counter, []string{}, prometheus.Labels{"aggr": v.ObjectName, "cluster": clusterName}),
-				prometheus.GaugeValue,
+				prometheus.CounterValue,
 				val,
 			)
 		}
@@ -302,5 +301,3 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 	wg.Wait()
 
 }
-
-
