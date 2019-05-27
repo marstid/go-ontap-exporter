@@ -70,13 +70,13 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 	}
 
 	wg := sync.WaitGroup{}
-	wg.Add(3)
+	wg.Add(4)
 
 	// Disk
 	go func() {
 		defer wg.Done()
-		//defer timeTrack(time.Now(), "Disk")
 		client := ontap.NewClient(e.url, e.user, e.password, e.useSSL)
+		//defer timeTrack(time.Now(), "Disk")
 		client.Debug = e.debug
 
 		// Disk Performance
@@ -348,6 +348,35 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 				)
 			}
 
+		}
+
+	}()
+
+	// System
+	go func() {
+		defer wg.Done()
+
+		client := ontap.NewClient(e.url, e.user, e.password, e.useSSL)
+		client.Debug = e.debug
+
+		sys, err := client.GetSystemPerf()
+		if err != nil {
+			log.Info(err.Error())
+			return
+		}
+
+		for _, v := range sys {
+
+			val, err := strconv.ParseFloat(v.Value, 64)
+			if err != nil {
+				val = 0
+			}
+
+			ch <- prometheus.MustNewConstMetric(
+				prometheus.NewDesc(namespace+"system_"+v.Counter, "System Performance counter "+v.Counter, []string{}, prometheus.Labels{"node": v.ObjectName, "cluster": clusterName}),
+				prometheus.CounterValue,
+				val,
+			)
 		}
 
 	}()

@@ -35,6 +35,7 @@ func main() {
 
 	log.Info("Serving Netapp metrics on :" + strconv.FormatInt(int64(port), 10))
 	log.Fatal(http.ListenAndServe(":"+strconv.FormatInt(int64(port), 10), nil))
+
 }
 
 func redirect(w http.ResponseWriter, r *http.Request) {
